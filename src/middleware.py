@@ -8,7 +8,7 @@ logger = logging.getLogger('uvicorn.access')
 logger.disabled = True
 
 def register_middleware(app: FastAPI):
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1" ,"taskm-api-dc03.onrender.com","0.0.0.0"])
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1" ,"task-manager-api-4zor.onrender.com","0.0.0.0"])
     
     app.add_middleware(CORSMiddleware, allow_origins=["*"],
         allow_methods=["*"],
