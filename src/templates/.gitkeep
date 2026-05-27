@@ -1,0 +1,1 @@
+# Keep directory so that fastapi-mail ConnectionConfig does not fail validation due to a missing directory

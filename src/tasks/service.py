@@ -1,6 +1,5 @@
 import uuid
 from typing import Optional
-from sentry_sdk import session
 from sqlmodel import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.models import Task, TaskActivity

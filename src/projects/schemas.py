@@ -66,6 +66,13 @@ class AddMemberModel(BaseModel):
 
 class UpdateMemberRoleModel(BaseModel):
     role: str
+
+    @field_validator('role')
+    @classmethod
+    def check_role(cls, v):
+        if v not in VALID_MEMBER_ROLES:
+            raise ValueError(f'Role must be one of {VALID_MEMBER_ROLES}')
+        return v
     
 class PaginatedResponse(BaseModel):
     total: int

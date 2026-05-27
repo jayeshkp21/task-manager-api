@@ -9,3 +9,9 @@ taskm/
 .taskm/
 *.egg-info/
 .DS_Store
+.vscode/
+.idea/
+!.env.example
+*.log
+Thumbs.db
+migrations/__pycache__/
