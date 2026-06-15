@@ -36,12 +36,17 @@ class ProjectModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserModelShort(BaseModel):
+    username: str
+    email: str
+
 class MemberModel(BaseModel):
     uid: uuid.UUID
     project_uid: uuid.UUID
     user_uid: uuid.UUID
     role: str
     joined_at: datetime
+    user: Optional[UserModelShort] = None
 
     model_config = ConfigDict(from_attributes=True)
 

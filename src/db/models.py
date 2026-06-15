@@ -62,6 +62,7 @@ class ProjectMember(SQLModel, table=True):
     user_uid: uuid.UUID = Field(foreign_key="users.uid")
     role: str = Field(sa_column=Column(pg.VARCHAR, nullable=False, server_default="member"))
     joined_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, default=datetime.now))
+    user: Optional[User] = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
 
 class Task(SQLModel, table=True):
