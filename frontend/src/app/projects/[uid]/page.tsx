@@ -17,6 +17,13 @@ interface Task {
   assignee?: string;
 }
 
+interface Comment {
+  uid: string;
+  content: string;
+  author_uid: string;
+  created_at: string;
+}
+
 export default function ProjectBoardPage() {
   const params = useParams();
   const router = useRouter();
@@ -27,6 +34,10 @@ export default function ProjectBoardPage() {
   const [userName, setUserName] = useState('User');
   const [loading, setLoading] = useState(true);
   const [currentUserUid, setCurrentUserUid] = useState<string | null>(null);
+
+  // Comments State
+  const [selectedTaskUid, setSelectedTaskUid] = useState<string | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
 
   const validateUuid = (str: string) => {
     const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -62,7 +73,6 @@ export default function ProjectBoardPage() {
             description: project.description || '',
           });
         } else {
-          // Redirect to dashboard if project not found
           router.push('/dashboard');
           return;
         }
@@ -84,7 +94,6 @@ export default function ProjectBoardPage() {
       const res = await api.getProjectTasks(uid);
       if (res.ok) {
         const data = await res.json();
-        // Map backend tasks to frontend state
         const mapped: Task[] = (data.items || []).map((t: any) => ({
           id: String(t.uid),
           title: t.title,
@@ -99,6 +108,23 @@ export default function ProjectBoardPage() {
     } catch (err) {
       console.error('Error fetching tasks:', err);
     }
+  };
+
+  const fetchComments = async (taskUid: string) => {
+    try {
+      const res = await api.getComments(uid, taskUid);
+      if (res.ok) {
+        const commentData = await res.json();
+        setComments(commentData);
+      }
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    }
+  };
+
+  const handleTaskClick = async (task: Task) => {
+    setSelectedTaskUid(task.id);
+    await fetchComments(task.id);
   };
 
   const handleCreateTask = async (taskData: any) => {
@@ -153,6 +179,36 @@ export default function ProjectBoardPage() {
     }
   };
 
+  const handleAddComment = async (content: string) => {
+    if (!selectedTaskUid) return;
+    try {
+      const res = await api.addComment(uid, selectedTaskUid, { content });
+      if (res.ok) {
+        await fetchComments(selectedTaskUid);
+      } else {
+        const err = await res.json();
+        alert(err.message || err.detail || 'Failed to add comment');
+      }
+    } catch (err) {
+      console.error('Error adding comment:', err);
+    }
+  };
+
+  const handleDeleteComment = async (commentUid: string) => {
+    if (!selectedTaskUid) return;
+    try {
+      const res = await api.deleteComment(uid, selectedTaskUid, commentUid);
+      if (res.ok) {
+        await fetchComments(selectedTaskUid);
+      } else {
+        const err = await res.json();
+        alert(err.message || err.detail || 'Failed to delete comment');
+      }
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await api.logout();
@@ -180,7 +236,6 @@ export default function ProjectBoardPage() {
     );
   }
 
-  // Calculate project stats dynamically
   const stats = {
     totalTasks: tasks.length,
     completedTasks: tasks.filter(t => t.status === 'done').length,
@@ -211,6 +266,11 @@ export default function ProjectBoardPage() {
             tasks={tasks}
             onCreateTask={handleCreateTask}
             onUpdateTask={handleUpdateTask}
+            onTaskClick={handleTaskClick}
+            currentUserUid={currentUserUid || undefined}
+            comments={comments}
+            onAddComment={handleAddComment}
+            onDeleteComment={handleDeleteComment}
           />
         </div>
       </div>
